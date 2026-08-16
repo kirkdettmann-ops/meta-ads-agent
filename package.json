@@ -12,6 +12,7 @@
     "db:migrate": "supabase db push",
     "db:reset": "supabase db reset",
     "seed": "tsx scripts/seed-tenant.ts",
+    "gen-link": "tsx scripts/generate-magic-link.ts",
     "probe:meta": "tsx scripts/probe-meta.ts"
   },
   "dependencies": {

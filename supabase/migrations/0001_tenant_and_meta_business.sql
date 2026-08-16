@@ -3,7 +3,9 @@
 -- Multi-tenant from day 1. No retrofits.
 
 -- ============================================================
--- tenant: One row per agency client (NEON, future clients)
+-- tenant: One row per customer. The system is multi-tenant from day 1.
+-- First external customer is "Comedy Club Co" (the demo / primary showcasing tenant).
+-- NEON (Nils's own business) is one tenant among many.
 -- ============================================================
 create table public.tenant (
   id uuid primary key default gen_random_uuid(),

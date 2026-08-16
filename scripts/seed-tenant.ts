@@ -1,19 +1,41 @@
 /**
- * Seed script: Create a tenant + the first user profile.
+ * Seed script: Create a tenant + the first user profile + placeholder social handles.
  *
- * Usage:
- *   npm run seed -- --email "kirkdettmann-ops@github.com" --tenant-name "NEON" --tenant-slug "neon"
+ * Usage (default — the demo / primary showcasing tenant):
+ *   npm run seed -- --email "kirkdettmann@gmail.com"
+ *
+ *   Defaults to "Comedy Club Co" — the first external customer (per the customer
+ *   model pivot on 2026-08-16). The "primary showcasing" of the product happens
+ *   against this tenant.
+ *
+ *   For Nils's own NEON business (also a tenant, not the showcase):
+ *   npm run seed -- --email "nils@neon.example" --tenant-name "NEON" --tenant-slug "neon"
  *
  * What it does:
  *   1. Inserts a row into public.tenant
  *   2. Inserts a row into public.user_profile pointing to the existing auth user
  *      (the user must sign in once via magic link first, so their auth.users row exists)
+ *   3. Inserts placeholder rows into public.tenant_social_handle for the four
+ *      v1 platforms (facebook, instagram, tiktok, youtube) — KIRK, 2026-08-16.
+ *      When the customer shares their real socials, an admin (Kirk) updates
+ *      handle + url + flips status to 'connected'.
  *
  * Idempotent: re-running with the same slug is a no-op for the tenant row,
- * and overwrites the user_profile.role to "owner".
+ * overwrites the user_profile.role, and is a no-op for the four social-handle
+ * placeholder rows (they exist already with the same values).
  */
 
+import { existsSync } from "node:fs";
+
+// Load .env.local when this script is run via `tsx` outside `next dev`.
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+}
+
 import { createServiceClient } from "../src/lib/supabase/service";
+
+const V1_PLATFORMS = ["facebook", "instagram", "tiktok", "youtube"] as const;
+type V1Platform = (typeof V1_PLATFORMS)[number];
 
 async function main() {
   const args = process.argv.slice(2);
@@ -24,12 +46,15 @@ async function main() {
   }
 
   const email = argMap.email;
-  const tenantName = argMap["tenant-name"] ?? "NEON";
-  const tenantSlug = argMap["tenant-slug"] ?? "neon";
+  // KIRK, 2026-08-16: default to "Comedy Club Co" (the first external customer, the
+  // primary showcasing tenant) rather than NEON. NEON is one of many tenants
+  // but it's Nils's own business, not the customer-facing demo.
+  const tenantName = argMap["tenant-name"] ?? "Comedy Club Co";
+  const tenantSlug = argMap["tenant-slug"] ?? "comedy-club-co";
   const role = argMap.role ?? "owner";
 
   if (!email) {
-    console.error("Usage: npm run seed -- --email you@example.com [--tenant-name NEON] [--tenant-slug neon] [--role owner]");
+    console.error("Usage: npm run seed -- --email you@example.com [--tenant-name \"Comedy Club Co\"] [--tenant-slug comedy-club-co] [--role owner]");
     process.exit(1);
   }
 
@@ -74,6 +99,30 @@ async function main() {
     process.exit(1);
   }
   console.log(`✓ user_profile: ${email} → ${tenantName} (role: ${role})`);
+
+  // 4. Upsert placeholder social handles for the four v1 platforms.
+  // Idempotent: ON CONFLICT (tenant_id, platform) DO NOTHING preserves any
+  // real value the admin has already wired in.
+  for (const platform of V1_PLATFORMS) {
+    const { error: handleErr } = await supabase
+      .from("tenant_social_handle")
+      .upsert(
+        {
+          tenant_id: tenant.id,
+          platform,
+          handle: null,
+          url: null,
+          status: "placeholder",
+          notes: "Seeded as placeholder — update when client shares socials.",
+        },
+        { onConflict: "tenant_id,platform", ignoreDuplicates: true },
+      );
+    if (handleErr) {
+      console.error(`Failed to upsert tenant_social_handle (${platform}):`, handleErr.message);
+      process.exit(1);
+    }
+  }
+  console.log(`✓ tenant_social_handle: ${V1_PLATFORMS.join(", ")} (status=placeholder)`);
 
   console.log("\nDone. Sign out and back in to pick up the new tenant.");
 }

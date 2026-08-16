@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Meta Ads Agent",
-  description: "Meta Ads management for NEON — read-only agent for spend recommendations and audience signals.",
+  title: "Comedy Club Ads",
+  description: "Comedy Club Co. ad management — multi-tenant Meta + TikTok + YouTube campaigns, spend recommendations, and audience signals.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

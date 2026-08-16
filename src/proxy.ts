@@ -2,11 +2,14 @@ import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
 /**
- * Supabase auth middleware.
+ * Supabase auth proxy (Next 16 convention).
+ * Renamed from `middleware` per the Next 16 codemod:
+ * https://nextjs.org/docs/messages/middleware-to-proxy
+ *
  * Refreshes the auth cookies on every request.
  * Protects /dashboard, /businesses, /recommendations from anonymous access.
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   return await updateSession(request);
 }
 

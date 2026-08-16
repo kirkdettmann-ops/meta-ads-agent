@@ -4,15 +4,16 @@ import { LogOut, User } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { MobileNav } from "./brand/mobile-nav";
+import { ComedyClubMark } from "./brand/comedy-club-mark";
 
 type Props = {
   email: string | null;
   displayName: string | null;
   role: string | null;
-  tenantName: string | null;
 };
 
-export function Header({ email, displayName, role, tenantName }: Props) {
+export function Header({ email, displayName, role }: Props) {
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -22,17 +23,17 @@ export function Header({ email, displayName, role, tenantName }: Props) {
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-border bg-background px-4 md:px-6">
-      <div className="flex items-center gap-3">
-        {tenantName && (
-          <div className="text-sm">
-            <span className="text-muted-foreground">Tenant:</span>{" "}
-            <span className="font-medium">{tenantName}</span>
-          </div>
-        )}
+    <header className="flex h-14 items-center justify-between gap-2 border-b border-border bg-background px-4 md:px-6">
+      <div className="flex items-center gap-2">
+        <MobileNav />
+        {/* Brand mark on mobile — sidebar holds the full wordmark on desktop */}
+        <ComedyClubMark
+          className="h-7 w-7 text-foreground md:hidden"
+          aria-label="Comedy Club Co"
+        />
       </div>
       <div className="flex items-center gap-3">
-        <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
           <User className="h-4 w-4" />
           <span>{displayName || email || "—"}</span>
           {role && (

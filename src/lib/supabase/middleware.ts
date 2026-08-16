@@ -33,7 +33,14 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Protected paths: redirect to /login if no user
+  // Auth callback is always pass-through: the user may not be signed in yet
+  // (this is how the magic-link handshake lands), and the route handler
+  // is responsible for the actual code exchange + redirect.
+  if (request.nextUrl.pathname === "/auth/callback") {
+    return response;
+  }
+
+  // Protected paths: redirect to /login if no user.
   const protectedPaths = ["/dashboard", "/businesses", "/recommendations"];
   const isProtected = protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p));
   if (isProtected && !user) {

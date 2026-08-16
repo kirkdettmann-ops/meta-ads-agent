@@ -17,12 +17,10 @@ export default function NoTenantPage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
-          <p>To fix this, run the seed script:</p>
+          <p>To fix this, run the seed script (defaults to the demo tenant &quot;Comedy Club Co&quot;):</p>
           <pre className="rounded-md bg-muted p-3 text-xs overflow-x-auto">
 {`npm run seed -- \\
-  --email you@example.com \\
-  --tenant-name "NEON" \\
-  --tenant-slug neon`}
+  --email you@example.com`}
           </pre>
           <p>
             Or contact the agency admin to add you. <Link href="/login" className="text-primary hover:underline">Back to sign in</Link>

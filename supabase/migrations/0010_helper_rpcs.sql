@@ -1,6 +1,6 @@
 -- Migration 0010: SECURITY DEFINER Helper RPCs
 -- These are the ONLY data access path from the Next.js app.
--- Reason: the APX/CVG saga — direct RSC reads from('table') hit a 5-min
+-- Reason: the APX/CVG saga â€” direct RSC reads from('table') hit a 5-min
 -- edge runtime hang on tenant_id RLS. SECURITY DEFINER bypasses RLS
 -- and the RPCs do the tenant check internally. This is the fix.
 
@@ -198,7 +198,7 @@ begin
     select rc.meta_campaign_id, rc.name, rc.objective, rc.status,
            rc.daily_budget, rc.lifetime_budget
     from public.raw_campaign rc
-    join public.meta_ad_account ma on ma.tenant_id = rc.tenant_id and ma.meta_account_id = rc.meta_campaign_id
+    join public.meta_ad_account ma on ma.id = rc.meta_ad_account_id
     where rc.tenant_id = p_tenant_id
       and ma.meta_business_id = p_business_id
       and rc.fetched_at = (
@@ -398,4 +398,4 @@ begin
 end;
 $$;
 
-comment on function public.update_recommendation_status is 'Approve / reject / snooze a recommendation. In v1 this only changes the status — Meta API writes are Phase 3.';
+comment on function public.update_recommendation_status is 'Approve / reject / snooze a recommendation. In v1 this only changes the status â€” Meta API writes are Phase 3.';
