@@ -31,6 +31,12 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           "inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors",
+          // Explicit `cursor-pointer` so the hand cursor shows up on hover
+          // even when the default browser button cursor is being reset by
+          // a global CSS rule. Browsers default <button> to pointer, but
+          // we hit a case (Tailwind v4 preflight in production) where
+          // the default got swallowed and the button felt dead to users.
+          "cursor-pointer",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
           "disabled:pointer-events-none disabled:opacity-50",
           variantClasses[variant],
