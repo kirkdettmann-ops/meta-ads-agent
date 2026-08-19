@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
               name: acct.name,
               currency: acct.currency ?? "USD",
               timezone: acct.timezone_name ?? "UTC",
-              account_status: acct.account_status === 1 ? "active" : "disabled",
+              account_status: String(acct.account_status) === "1" ? "active" : "disabled",
               fetched_at: new Date().toISOString(),
             },
             { onConflict: "tenant_id,meta_account_id" },

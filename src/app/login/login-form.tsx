@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { isRedirectError } from "next/dist/client/components/redirect";
+// Next 16 moved isRedirectError from next/dist/client/components/redirect
+// to next/dist/client/components/redirect-error. The old import path
+// is no longer exported (per a fresh tsc check after flipping
+// typescript.ignoreBuildErrors to false).
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

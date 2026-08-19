@@ -12,7 +12,14 @@
  * Use this to verify Nils's token before running the cron.
  */
 
-import { createClient } from "facebook-nodejs-business-sdk";
+// The SDK exports its API both as a default export (CJS-style) and as
+// named exports. We use the default-import pattern here so it matches the
+// shim declaration in src/types/facebook-nodejs-business-sdk.d.ts (which
+// uses `export = sdk` for CJS interop). The dynamic-import pattern in
+// src/lib/meta/client.ts does the same — destructuring from the module's
+// default value.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const bizSdk = require("facebook-nodejs-business-sdk") as any;
 
 async function main() {
   const accessToken = process.env.META_SYSTEM_USER_TOKEN;
@@ -21,7 +28,7 @@ async function main() {
     process.exit(1);
   }
 
-  const { FacebookAds, Business } = createClient(accessToken);
+  const { FacebookAds, Business } = bizSdk.createClient(accessToken);
 
   const args = process.argv.slice(2);
   const argMap: Record<string, string> = {};
