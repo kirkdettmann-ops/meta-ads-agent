@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ComedyClubLogo } from "@/components/brand/comedy-club-logo";
 import { ComedyClubMark } from "@/components/brand/comedy-club-mark";
+import { FALLBACK_BRAND, type Brand } from "@/lib/brand";
 import { demoLogin } from "./actions";
 
 // `NEXT_PUBLIC_*` env vars are inlined at build time, so this is a constant
@@ -14,6 +15,26 @@ import { demoLogin } from "./actions";
 // single-button 1-click sign-in. In production we render the real
 // email + magic-link form.
 const demoLoginEnabled = process.env.NEXT_PUBLIC_DEMO_LOGIN === "true";
+
+/**
+ * Synthetic brand for the login page. The login route is unauthenticated so
+ * there's no tenant context — we can't read public.tenant_brand. Instead we
+ * build a Brand from NEXT_PUBLIC_* env vars (settable per-deployment at
+ * cutover) with the in-code FALLBACK_BRAND as a safety net.
+ *
+ * KIRK, 2026-08-19: this keeps the login page brandable for the customer
+ * without needing a "site config" singleton row. The customer's cutover
+ * checklist: set NEXT_PUBLIC_PRODUCT_NAME in Vercel, and the tab title +
+ * login wordmark both re-brand.
+ */
+const loginBrand: Brand = {
+  ...FALLBACK_BRAND,
+  productName: process.env.NEXT_PUBLIC_PRODUCT_NAME ?? FALLBACK_BRAND.productName,
+  displayName: process.env.NEXT_PUBLIC_BRAND_DISPLAY_NAME ?? FALLBACK_BRAND.displayName,
+  wordmarkBold: process.env.NEXT_PUBLIC_BRAND_WORDMARK_BOLD ?? FALLBACK_BRAND.wordmarkBold,
+  wordmarkLight: process.env.NEXT_PUBLIC_BRAND_WORDMARK_LIGHT ?? FALLBACK_BRAND.wordmarkLight,
+  tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE ?? FALLBACK_BRAND.tagline,
+};
 
 interface LoginFormProps {
   /**
@@ -79,7 +100,7 @@ function DemoLoginView({ initialError }: LoginFormProps) {
         Sign in to your dashboard
       </h1>
       <p className="max-w-sm text-sm text-muted-foreground">
-        One click gets you in. Direct access to the Comedy Club Co
+        One click gets you in. Direct access to the {loginBrand.displayName}{" "}
         workspace as the tenant admin.
       </p>
       <Button
@@ -252,7 +273,10 @@ function LoginShell({ children }: { children: React.ReactNode }) {
         {/* Page-level mic watermark — bigger and more visible on the dark base.
             Color is the brand red so it reads as intentional decor, not noise. */}
         <div className="absolute -bottom-44 -left-36 hidden h-[560px] w-[560px] opacity-[0.06] md:block">
-          <ComedyClubMark className="h-full w-full text-primary" />
+          <ComedyClubMark
+            className="h-full w-full text-primary"
+            aria-label={loginBrand.displayName}
+          />
         </div>
       </div>
 
@@ -265,11 +289,14 @@ function LoginShell({ children }: { children: React.ReactNode }) {
           aria-hidden="true"
           className="pointer-events-none absolute -right-10 -top-12 hidden h-64 w-64 opacity-[0.06] md:block"
         >
-          <ComedyClubMark className="h-full w-full text-foreground" />
+          <ComedyClubMark
+            className="h-full w-full text-foreground"
+            aria-label={loginBrand.displayName}
+          />
         </div>
 
         <div className="relative flex flex-col items-center gap-6 p-8 text-center md:p-10">
-          <ComedyClubLogo size="xl" />
+          <ComedyClubLogo brand={loginBrand} size="xl" />
 
           <div className="flex flex-col items-center gap-3">{children}</div>
         </div>

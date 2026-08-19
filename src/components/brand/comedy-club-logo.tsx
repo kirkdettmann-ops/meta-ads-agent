@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import type { Brand } from "@/lib/brand";
 import { ComedyClubMark } from "./comedy-club-mark";
 
 type Size = "sm" | "md" | "lg" | "xl";
@@ -12,6 +13,8 @@ const sizeMap: Record<Size, { mark: string; wordmark: string; gap: string }> = {
 };
 
 type Props = {
+  /** Tenant brand — drives the wordmark text. */
+  brand: Brand;
   size?: Size;
   /** When true (or when size === "xl"), shows the tagline below the wordmark. */
   withTagline?: boolean;
@@ -21,35 +24,39 @@ type Props = {
 };
 
 /**
- * Comedy Club Co logo (mark + wordmark).
+ * Tenant brand logo (mark + wordmark).
  *
- * Wordmark: "Comedy Club" in bold + "Co." in lighter weight with a
- * trailing period — a classic "Co." pattern (cf. Carhartt WIP Co.).
- * Tagline "Where the punchline lives." renders at xl size by default
- * or whenever `withTagline` is true.
+ * Wordmark pattern: "{wordmarkBold} {wordmarkLight}" with wordmarkBold in
+ * bold and wordmarkLight in lighter weight + muted color — a classic "Co."
+ * pattern that reads as the same template regardless of tenant.
  *
- * Use this anywhere the brand needs to be readable, not just present
- * (sidebar brand anchor, dashboard hero, email header, etc).
+ * Tagline renders at xl size by default or whenever `withTagline` is true.
+ *
+ * The ComedyClubMark is unchanged — the mark itself is brand-agnostic, the
+ * wordmark is what makes the logo feel owned.
  */
 export function ComedyClubLogo({
+  brand,
   size = "md",
   withTagline = false,
   asLink = false,
   className,
 }: Props) {
   const s = sizeMap[size];
-  const showTagline = withTagline || size === "xl";
+  const showTagline = (withTagline || size === "xl") && brand.tagline;
   const inner = (
     <span className={cn("flex items-center", s.gap, className)}>
       <ComedyClubMark className={cn(s.mark, "text-foreground")} />
       <span className="flex min-w-0 flex-col leading-none">
         <span className={cn("font-bold tracking-tight", s.wordmark)}>
-          Comedy Club{" "}
-          <span className="font-light text-muted-foreground">Co.</span>
+          {brand.wordmarkBold}{" "}
+          <span className="font-light text-muted-foreground">
+            {brand.wordmarkLight}
+          </span>
         </span>
         {showTagline && (
           <span className="mt-1.5 hidden text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground sm:block">
-            Where the punchline lives.
+            {brand.tagline}
           </span>
         )}
       </span>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SidebarContents } from "@/components/sidebar";
+import type { Brand } from "@/lib/brand";
 
 /**
  * Mobile navigation drawer.
@@ -20,7 +21,7 @@ import { SidebarContents } from "@/components/sidebar";
  *
  * Locks body scroll while open so the page underneath doesn't move.
  */
-export function MobileNav() {
+export function MobileNav({ brand }: { brand: Brand }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export function MobileNav() {
                 <X className="h-5 w-5" />
               </Button>
             </div>
-            <SidebarContents onNavigate={() => setOpen(false)} />
+            <SidebarContents brand={brand} onNavigate={() => setOpen(false)} />
           </div>
         </div>
       )}

@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { LayoutDashboard, Building2, ListChecks, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ComedyClubLogo } from "./brand/comedy-club-logo";
+import type { Brand } from "@/lib/brand";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -23,7 +24,13 @@ const nav = [
  * The `onNavigate` callback fires when any link is clicked — used by
  * the mobile drawer to close itself after a route change.
  */
-export function SidebarContents({ onNavigate }: { onNavigate?: () => void } = {}) {
+export function SidebarContents({
+  brand,
+  onNavigate,
+}: {
+  brand: Brand;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -37,7 +44,7 @@ export function SidebarContents({ onNavigate }: { onNavigate?: () => void } = {}
   return (
     <>
       <div className="flex h-14 items-center border-b border-border px-4">
-        <ComedyClubLogo size="md" asLink />
+        <ComedyClubLogo brand={brand} size="md" asLink />
       </div>
       <nav className="flex-1 space-y-1 px-2 py-4">
         {nav.map((item) => {
@@ -79,10 +86,10 @@ export function SidebarContents({ onNavigate }: { onNavigate?: () => void } = {}
  * Desktop sidebar. Hidden on mobile — the `MobileNav` component in the
  * header handles small-screen navigation via a drawer.
  */
-export function Sidebar() {
+export function Sidebar({ brand }: { brand: Brand }) {
   return (
     <aside className="hidden md:flex md:w-60 md:flex-col md:border-r md:border-border md:bg-muted/30">
-      <SidebarContents />
+      <SidebarContents brand={brand} />
     </aside>
   );
 }

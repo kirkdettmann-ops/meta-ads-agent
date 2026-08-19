@@ -1,5 +1,5 @@
 /**
- * Seed script: Create a tenant + the first user profile + placeholder social handles.
+ * Seed script: Create a tenant + the first user profile + placeholder social handles + brand row.
  *
  * Usage (default — the demo / primary showcasing tenant):
  *   npm run seed -- --email "kirkdettmann@gmail.com"
@@ -19,10 +19,14 @@
  *      v1 platforms (facebook, instagram, tiktok, youtube) — KIRK, 2026-08-16.
  *      When the customer shares their real socials, an admin (Kirk) updates
  *      handle + url + flips status to 'connected'.
+ *   4. Inserts a brand row into public.tenant_brand with the customer's brand
+ *      values. For the demo we seed the Comedy Club Co defaults so the UI
+ *      re-skinning framework has something real to read. When a real customer
+ *      takes over, this row is updated with their actual brand.
  *
  * Idempotent: re-running with the same slug is a no-op for the tenant row,
- * overwrites the user_profile.role, and is a no-op for the four social-handle
- * placeholder rows (they exist already with the same values).
+ * overwrites the user_profile.role, is a no-op for the four social-handle
+ * placeholder rows, and overwrites the brand row.
  */
 
 import { existsSync } from "node:fs";
@@ -83,6 +87,44 @@ async function main() {
     process.exit(1);
   }
   console.log(`✓ tenant: ${tenant.name} (${tenant.id})`);
+
+  // 2.5. Upsert brand row (migration 0015). For the demo this is the
+  // Comedy Club Co defaults — the same values the UI used to have hardcoded
+  // before the brand-swap framework landed. When a real customer takes over
+  // this row gets updated with their actual brand.
+  //
+  // KIRK, 2026-08-19: brand is part of the "drop-in" migration story. The
+  // customer updates this row ONCE during cutover, and the whole UI re-skins.
+  const DEFAULT_BRAND = {
+    product_name: "Comedy Club Ads",
+    display_name: "Comedy Club Co",
+    wordmark_bold: "Comedy Club",
+    wordmark_light: "Co.",
+    tagline: "Where the punchline lives.",
+    primary_oklch: "oklch(0.55 0.22 27)",
+    watermark_svg: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <rect x="11" y="3" width="10" height="16" rx="5" fill="currentColor"/>
+      <line x1="13" y1="7" x2="19" y2="7" stroke="var(--color-card)" stroke-width="0.7" stroke-linecap="round" opacity="0.35"/>
+      <line x1="13" y1="10.5" x2="19" y2="10.5" stroke="var(--color-card)" stroke-width="0.7" stroke-linecap="round" opacity="0.35"/>
+      <line x1="13" y1="14" x2="19" y2="14" stroke="var(--color-card)" stroke-width="0.7" stroke-linecap="round" opacity="0.35"/>
+      <path d="M 6.5 15.5 V 17.5 a 9.5 9.5 0 0 0 19 0 V 15.5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <line x1="16" y1="27" x2="16" y2="30" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <rect x="11" y="30" width="10" height="1.75" rx="0.875" fill="currentColor"/>
+      <path d="M 26 5.5 l 0.5 1.3 l 1.3 0.5 l -1.3 0.5 l -0.5 1.3 l -0.5 -1.3 l -1.3 -0.5 l 1.3 -0.5 z" fill="var(--color-primary)"/>
+    </svg>`,
+  };
+  const { error: brandErr } = await supabase.from("tenant_brand").upsert(
+    {
+      tenant_id: tenant.id,
+      ...DEFAULT_BRAND,
+    },
+    { onConflict: "tenant_id" },
+  );
+  if (brandErr) {
+    console.error("Failed to upsert tenant_brand:", brandErr.message);
+    process.exit(1);
+  }
+  console.log(`✓ tenant_brand: "${DEFAULT_BRAND.display_name}" (default seed)`);
 
   // 3. Upsert user_profile
   const { error: profileErr } = await supabase.from("user_profile").upsert(

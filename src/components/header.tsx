@@ -6,14 +6,17 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./brand/mobile-nav";
 import { ComedyClubMark } from "./brand/comedy-club-mark";
+import type { Brand } from "@/lib/brand";
 
 type Props = {
   email: string | null;
   displayName: string | null;
   role: string | null;
+  /** Tenant brand — used for the mobile mark's aria-label. */
+  brand: Brand;
 };
 
-export function Header({ email, displayName, role }: Props) {
+export function Header({ email, displayName, role, brand }: Props) {
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -25,11 +28,11 @@ export function Header({ email, displayName, role }: Props) {
   return (
     <header className="flex h-14 items-center justify-between gap-2 border-b border-border bg-background px-4 md:px-6">
       <div className="flex items-center gap-2">
-        <MobileNav />
+        <MobileNav brand={brand} />
         {/* Brand mark on mobile — sidebar holds the full wordmark on desktop */}
         <ComedyClubMark
           className="h-7 w-7 text-foreground md:hidden"
-          aria-label="Comedy Club Co"
+          aria-label={brand.displayName}
         />
       </div>
       <div className="flex items-center gap-3">
