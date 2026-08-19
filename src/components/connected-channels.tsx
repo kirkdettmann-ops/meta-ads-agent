@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Facebook, Instagram, Youtube, Music2, Link2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { requireUserWithProfile } from "@/lib/auth";
+import { EditSocialHandleDialog } from "./edit-social-handle-dialog";
 
 type ChannelRow = {
   platform: string;
@@ -12,12 +13,18 @@ type ChannelRow = {
   notes:    string | null;
 };
 
-const PLATFORM_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+const PLATFORM_META: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ className?: string }> }
+> = {
   facebook:  { label: "Facebook",   icon: Facebook },
   instagram: { label: "Instagram",  icon: Instagram },
   tiktok:    { label: "TikTok",     icon: Music2 },
   youtube:   { label: "YouTube",    icon: Youtube },
 };
+
+const V1_PLATFORMS = ["facebook", "instagram", "tiktok", "youtube"] as const;
+type V1Platform = (typeof V1_PLATFORMS)[number];
 
 function statusBadge(status: string) {
   if (status === "connected") {
@@ -37,8 +44,17 @@ function statusBadge(status: string) {
  * they advertise *with*. For the demo / primary showcasing, these are seeded
  * as `placeholder` until the customer shares their real socials.
  *
+ * Each tile has an "Add" or "Edit" button that opens the inline
+ * `EditSocialHandleDialog` — clicking it calls the `upsert_social_handle`
+ * RPC (security definer, tenant-in-scope check inside) and refreshes the
+ * page server-component on success.
+ *
  * Reads via the SECURITY DEFINER RPC `get_connected_channels(p_tenant_id)`.
- * Server component, no client state.
+ * Server component shell; the edit dialog is the only client island.
+ *
+ * KIRK, 2026-08-19: part of the migration prep trio (brand + ownership +
+ * connect). The dialog is fully implemented; the customer can live-test it
+ * once they share their real social URLs.
  */
 export async function ConnectedChannels() {
   const { profile } = await requireUserWithProfile();
@@ -51,17 +67,24 @@ export async function ConnectedChannels() {
 
   // Ensure the four v1 platforms always show, even if no rows yet
   const byPlatform = new Map(rows.map((r) => [r.platform, r]));
-  for (const p of Object.keys(PLATFORM_META)) {
+  for (const p of V1_PLATFORMS) {
     if (!byPlatform.has(p)) {
-      byPlatform.set(p, { platform: p, handle: null, url: null, status: "placeholder", notes: null });
+      byPlatform.set(p, {
+        platform: p,
+        handle: null,
+        url: null,
+        status: "placeholder",
+        notes: null,
+      });
     }
   }
   const ordered = Array.from(byPlatform.values()).sort((a, b) => {
-    const order = ["facebook", "instagram", "tiktok", "youtube"];
+    const order = V1_PLATFORMS as readonly string[];
     return order.indexOf(a.platform) - order.indexOf(b.platform);
   });
 
   const placeholderCount = ordered.filter((r) => r.status === "placeholder").length;
+  const connectedCount = ordered.filter((r) => r.status === "connected").length;
 
   return (
     <Card>
@@ -77,11 +100,16 @@ export async function ConnectedChannels() {
               the platform ad accounts.
             </CardDescription>
           </div>
-          {placeholderCount > 0 && (
-            <Badge variant="outline">
-              {placeholderCount} placeholder{placeholderCount === 1 ? "" : "s"}
-            </Badge>
-          )}
+          <div className="flex items-center gap-2">
+            {connectedCount > 0 && (
+              <Badge variant="default">{connectedCount} connected</Badge>
+            )}
+            {placeholderCount > 0 && (
+              <Badge variant="outline">
+                {placeholderCount} placeholder{placeholderCount === 1 ? "" : "s"}
+              </Badge>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -95,6 +123,7 @@ export async function ConnectedChannels() {
               const Icon = meta.icon;
               const display = row.handle ?? row.url ?? "TBD — pending client share";
               const isClickable = row.status === "connected" && row.url;
+              const isPlaceholder = row.status === "placeholder";
               const inner = (
                 <div className="flex items-start gap-3 rounded-md border border-border bg-card p-3 transition-colors hover:bg-muted/30">
                   <Icon className="h-5 w-5 mt-0.5 text-muted-foreground shrink-0" />
@@ -111,6 +140,14 @@ export async function ConnectedChannels() {
                         {row.notes}
                       </p>
                     )}
+                    <div className="pt-1">
+                      <EditSocialHandleDialog
+                        tenantId={profile.tenant_id}
+                        platform={row.platform as V1Platform}
+                        initial={row}
+                        isPlaceholder={isPlaceholder}
+                      />
+                    </div>
                   </div>
                 </div>
               );
