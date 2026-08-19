@@ -36,8 +36,17 @@ export async function getTenantBrand(p_tenant_id: string): Promise<Brand> {
     console.warn("get_tenant_brand failed, using FALLBACK_BRAND:", error.message);
     return FALLBACK_BRAND;
   }
-  const r = data as
-    | {
+  // RPCs declared as `returns table (...)` come back from PostgREST as a
+  // SINGLE-ROW ARRAY (or null when the function returned no rows). The
+  // first version of this code treated `data` as a single object, which
+  // meant every field came back as undefined — the watermark_svg SVG
+  // string was `undefined`, the `dangerouslySetInnerHTML={{__html: ...}}`
+  // call got `{__html: undefined}`, and React 19 threw at runtime:
+  //   "props.dangerouslySetInnerHTML must be in the form {__html: ...}".
+  // Match the pattern used by get_connected_channels (an array of rows,
+  // take the first one) — that's the convention across this codebase.
+  const rows = (data as
+    | Array<{
         product_name:   string;
         display_name:   string;
         wordmark_bold:  string;
@@ -45,8 +54,9 @@ export async function getTenantBrand(p_tenant_id: string): Promise<Brand> {
         tagline:        string | null;
         primary_oklch:  string;
         watermark_svg:  string;
-      }
-    | null;
+      }>
+    | null) ?? [];
+  const r = rows[0];
   if (!r) return FALLBACK_BRAND;
   return {
     productName:   r.product_name,
