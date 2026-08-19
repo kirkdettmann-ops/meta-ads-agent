@@ -1,7 +1,7 @@
 import { requireUserWithProfile } from "@/lib/auth";
 import { Sidebar } from "@/components/sidebar";
 import { Header } from "@/components/header";
-import { getTenantBrand } from "@/lib/brand";
+import { getTenantBrand } from "@/lib/brand-server";
 
 /**
  * App shell layout — wraps every authenticated page.

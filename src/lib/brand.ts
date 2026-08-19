@@ -1,24 +1,19 @@
 /**
- * Tenant brand helper.
+ * Tenant brand — types and defaults only (safe for both client + server).
  *
- * The brand (display name, wordmark, tagline, hero watermark SVG, primary
- * color) is stored in `public.tenant_brand` (1:1 with tenant, migration 0015)
- * and read via the `get_tenant_brand(p_tenant_id)` RPC. The RPC has hardcoded
- * Comedy Club Co defaults so the UI never breaks if the tenant has no brand
- * row yet — a fresh deployment can run all migrations without seeding brand
- * data and the dashboard still shows something sensible.
+ * The actual server-side `getTenantBrand()` lives in `./brand-server.ts` so
+ * client components can import the type and fallback without dragging
+ * `next/headers` (and the Supabase server client) into the client bundle.
  *
- * Brand swap on cutover is a one-line UPDATE against the brand row. The
- * whole UI re-skins (header, sidebar logo, dashboard hero, hero watermark).
- *
- * RLS: read-only. The write API (`upsert_tenant_brand`) is used by admin
- * scripts only; the customer-facing settings UI is not in v1.
- *
- * KIRK, 2026-08-19: brand framework — part of the migration prep trio
- * (brand + ownership + connect). See canonical plan, §0 + §3.
+ * KIRK, 2026-08-19: this split exists because Turbopack (Next 16's default
+ * bundler) is strict about the server/client boundary. Importing the
+ * `getTenantBrand` function from any client component blows up the build
+ * with: "You're importing a module that depends on 'next/headers'. This
+ * API is only available in Server Components." The fix: keep the
+ * server-only RPC call in a separate file (./brand-server.ts) that only
+ * server components import. This file has no server imports, so it's
+ * safe to import from anywhere.
  */
-
-import { createClient } from "@/lib/supabase/server";
 
 /** What the brand reads as in the UI. camelCase on the JS side, snake_case in the DB. */
 export type Brand = {
@@ -32,9 +27,9 @@ export type Brand = {
 };
 
 /** Default brand — matches the hardcoded Comedy Club Co values that lived in
- *  the source files before migration 0015. Used only as a safety net if the
- *  RPC ever returns nothing (e.g. schema migration mid-deploy). The RPC itself
- *  also has these defaults. */
+ *  the source files before migration 0015. Used as a safety net if the RPC
+ *  ever returns nothing (e.g. mid-deploy) and as the source for the login
+ *  page (which can't read tenant_brand — no signed-in user at /login). */
 export const FALLBACK_BRAND: Brand = {
   productName:   "Comedy Club Ads",
   displayName:   "Comedy Club Co",
@@ -49,39 +44,3 @@ export const FALLBACK_BRAND: Brand = {
     <rect x="11" y="30" width="10" height="1.75" rx="0.875" fill="currentColor"/>
   </svg>`,
 };
-
-/** Fetch the brand for a tenant. Always returns a Brand (never null) — the
- *  RPC has its own hardcoded fallbacks. */
-export async function getTenantBrand(p_tenant_id: string): Promise<Brand> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_tenant_brand", {
-    p_tenant_id,
-  });
-  if (error) {
-    // Don't crash the whole page if the brand RPC is missing — fall back
-    // to the in-code defaults. Common during schema migrations.
-    console.warn("get_tenant_brand failed, using FALLBACK_BRAND:", error.message);
-    return FALLBACK_BRAND;
-  }
-  const r = data as
-    | {
-        product_name:   string;
-        display_name:   string;
-        wordmark_bold:  string;
-        wordmark_light: string;
-        tagline:        string | null;
-        primary_oklch:  string;
-        watermark_svg:  string;
-      }
-    | null;
-  if (!r) return FALLBACK_BRAND;
-  return {
-    productName:   r.product_name,
-    displayName:   r.display_name,
-    wordmarkBold:  r.wordmark_bold,
-    wordmarkLight: r.wordmark_light,
-    tagline:       r.tagline,
-    primaryOklch:  r.primary_oklch,
-    watermarkSvg:  r.watermark_svg,
-  };
-}

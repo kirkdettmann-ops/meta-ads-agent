@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { ComedyClubLogo } from "./comedy-club-logo";
 import { cn } from "@/lib/utils";
-import { getTenantBrand } from "@/lib/brand";
+import { getTenantBrand } from "@/lib/brand-server";
 import { requireUserWithProfile } from "@/lib/auth";
 
 type BadgeVariant = "default" | "secondary" | "outline";
