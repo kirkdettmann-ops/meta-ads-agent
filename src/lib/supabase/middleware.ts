@@ -28,10 +28,17 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // Refresh the session (this also reads the user)
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Refresh the session (this also reads the user). Wrap in try/catch so a
+  // transient Supabase network error doesn't brick every request as
+  // "Minified React error #441" — treat the user as signed-out instead,
+  // which routes them to /login via the protected-path redirect below.
+  let user: { id: string; email?: string | null } | null = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data.user;
+  } catch (err) {
+    console.warn("[proxy] getUser failed, treating as signed-out:", err);
+  }
 
   // Auth callback is always pass-through: the user may not be signed in yet
   // (this is how the magic-link handshake lands), and the route handler

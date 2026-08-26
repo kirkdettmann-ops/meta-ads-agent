@@ -15,7 +15,19 @@ import { getTenantBrand } from "@/lib/brand-server";
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, profile } = await requireUserWithProfile();
-  const brand = await getTenantBrand(profile.tenant_id);
+  // Brand fetch is wrapped in try/catch with FALLBACK_BRAND as the safety
+  // net (getTenantBrand already does this internally) so a Supabase outage
+  // doesn't take down the whole /dashboard/* surface as "Minified React
+  // error #441". The brand is decorative — better to render with the
+  // default wordmark than to crash the page.
+  let brand;
+  try {
+    brand = await getTenantBrand(profile.tenant_id);
+  } catch (err) {
+    console.warn("[app/layout] getTenantBrand failed, using FALLBACK_BRAND:", err);
+    const { FALLBACK_BRAND } = await import("@/lib/brand");
+    brand = FALLBACK_BRAND;
+  }
 
   return (
     <div className="flex min-h-screen">
