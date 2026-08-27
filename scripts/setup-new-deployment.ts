@@ -108,6 +108,7 @@ const TABLES_TO_CHECK: Array<[string, string]> = [
   ["0014", "tenant_video_asset"],
   ["0015", "tenant_brand"],
   ["0017", "crm_contact"],
+  ["0018", "crm_business"],
 ];
 
 const RPCS_TO_CHECK: Array<[string, string, Record<string, unknown>]> = [
@@ -130,6 +131,16 @@ const RPCS_TO_CHECK: Array<[string, string, Record<string, unknown>]> = [
     p_name:      "__probe_ignore__",
   }],
   ["0017", "delete_crm_contact", {
+    p_tenant_id: "00000000-0000-0000-0000-000000000000",
+    p_id:        "00000000-0000-0000-0000-000000000000",
+  }],
+  ["0018", "get_crm_businesses", { p_tenant_id: "00000000-0000-0000-0000-000000000000" }],
+  ["0018", "upsert_crm_business", {
+    p_tenant_id: "00000000-0000-0000-0000-000000000000",
+    p_id:        null,
+    p_name:      "__probe_ignore__",
+  }],
+  ["0018", "delete_crm_business", {
     p_tenant_id: "00000000-0000-0000-0000-000000000000",
     p_id:        "00000000-0000-0000-0000-000000000000",
   }],

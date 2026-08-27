@@ -75,6 +75,8 @@ const tables = [
   ['0015', 'tenant_brand'],
   // 0017
   ['0017', 'crm_contact'],
+  // 0018
+  ['0018', 'crm_business'],
 ];
 
 const rpcs = [
@@ -98,6 +100,14 @@ const rpcs = [
     ...tenantArg, p_id: null, p_name: '__probe__',
   }]],
   ['0017', 'delete_crm_contact', [tenantArg, {
+    ...tenantArg, p_id: '00000000-0000-0000-0000-000000000000',
+  }]],
+  // 0018
+  ['0018', 'get_crm_businesses', [tenantArg]],
+  ['0018', 'upsert_crm_business', [tenantArg, {
+    ...tenantArg, p_id: null, p_name: '__probe__',
+  }]],
+  ['0018', 'delete_crm_business', [tenantArg, {
     ...tenantArg, p_id: '00000000-0000-0000-0000-000000000000',
   }]],
   // 0010 daily_briefing

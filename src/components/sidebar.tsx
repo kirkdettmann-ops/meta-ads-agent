@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, LayoutDashboard, Building2, Users, ListChecks, LogOut, type LucideIcon } from "lucide-react";
+import { ChevronDown, ChevronRight, LayoutDashboard, Building2, Briefcase, Users, ListChecks, LogOut, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ComedyClubLogo } from "./brand/comedy-club-logo";
 import type { Brand } from "@/lib/brand";
@@ -18,12 +18,19 @@ import type { Brand } from "@/lib/brand";
  *
  * KIRK, 2026-08-27: CRM became a group so the customer can have multiple
  * CRM sections (Companies, Contacts, Sales Pipeline, Overview) under one
- * nav slot. v0.1 only ships Contacts; Businesses joins in a follow-up
- * commit (the new `crm_business` entity).
+ * nav slot. v0.1 ships Contacts; v0.2 adds Businesses (the new
+ * `crm_business` entity — the companies the customer has contracts with,
+ * distinct from /ad-accounts which is the Meta BM layer).
  *
- * `Building2` icon for "Ad accounts" — the renamed Meta Business Manager
- * layer. The new CRM Businesses entity (when added) will use its own icon
- * to keep the two "business"-flavored concepts visually distinct.
+ * Icons:
+ *   - `Building2` for "Ad accounts" — the renamed Meta Business Manager
+ *     layer.
+ *   - `Briefcase` for CRM > Businesses — the customer's contract-tracked
+ *     commercial relationships.
+ *   - `Users` for CRM > Contacts — people.
+ *
+ * The two "business"-flavored concepts use distinct icons so the sidebar
+ * is unambiguous at a glance.
  */
 type NavLink = {
   kind: "link";
@@ -51,7 +58,7 @@ const nav: readonly NavItem[] = [
     icon: Users,
     defaultOpen: true,
     children: [
-      // Businesses will be added in the crm_business commit (2026-08-27).
+      { kind: "link", href: "/dashboard/crm/businesses", label: "Businesses", icon: Briefcase },
       { kind: "link", href: "/dashboard/crm/contacts", label: "Contacts", icon: Users },
     ],
   },

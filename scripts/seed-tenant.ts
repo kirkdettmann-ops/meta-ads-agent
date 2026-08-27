@@ -247,6 +247,89 @@ async function main() {
     console.log(`✓ crm_contact: skipped (tenant already has ${existing.length}+ contact(s))`);
   }
 
+  // 6. Seed a small batch of CRM businesses (migration 0018) for the demo.
+  // Only runs if the tenant has zero crm_business rows — idempotent.
+  // KIRK, 2026-08-27: the customer has two businesses of their own
+  // (comedy club + food business) AND contracts with third parties.
+  // This seeds the third-party commercial relationships.
+  const { data: existingBiz, error: existingBizErr } = await supabase
+    .from("crm_business")
+    .select("id")
+    .eq("tenant_id", tenant.id)
+    .limit(1);
+  if (existingBizErr) {
+    console.error("Failed to check existing crm_businesses:", existingBizErr.message);
+    process.exit(1);
+  }
+  if (!existingBiz || existingBiz.length === 0) {
+    const seedBusinesses = [
+      {
+        name: "FreshBox Catering",
+        type: "supplier",
+        contact_person: "Marcus Tan",
+        email: "marcus@freshbox.my",
+        phone: "+60 3 2026 1234",
+        website: "https://freshbox.my",
+        address: "12 Jalan Industri, Petaling Jaya",
+        tags: ["supplier", "weekly", "net-15", "food"],
+        notes: "Supplies the kitchen every Tue + Fri. Net-15 terms. Backup contact: Sarah Lim.",
+      },
+      {
+        name: "Tiger Beer (Malaysia)",
+        type: "sponsor",
+        contact_person: "David Chen",
+        email: "david.chen@tigerbeer.example",
+        phone: "+60 3 2726 8888",
+        website: "https://www.tigerbeer.com.my",
+        address: "Level 12, Sunway Tower, Kuala Lumpur",
+        tags: ["sponsor", "brand", "recurring", "alcohol"],
+        notes: "Quarterly co-promotion budget. Q2 contract renews 2027-04-01.",
+      },
+      {
+        name: "Boom Boom Talent Agency",
+        type: "agency",
+        contact_person: "Lisa Wong",
+        email: "lisa@boomboom.example",
+        phone: "+60 3 2026 9999",
+        website: "https://boomboom.example",
+        address: "Lot 5, Bangsar Village",
+        tags: ["agency", "comedian-booking", "preferred"],
+        notes: "Primary source for headliner bookings. 10% commission on net ticket sales.",
+      },
+      {
+        name: "KL Food Beat",
+        type: "media",
+        contact_person: "Lisa Wong",
+        email: "lisa@klfoodbeat.com",
+        website: "https://klfoodbeat.com",
+        tags: ["press", "media", "food"],
+        notes: "Wants first look at any new menu launches. Not a contract — relationship only.",
+      },
+    ];
+    for (const b of seedBusinesses) {
+      const { error: bizErr } = await supabase.rpc("upsert_crm_business", {
+        p_tenant_id:      tenant.id,
+        p_id:             null,
+        p_name:           b.name,
+        p_type:           b.type,
+        p_contact_person: b.contact_person,
+        p_email:          b.email,
+        p_phone:          b.phone,
+        p_website:        b.website,
+        p_address:        b.address,
+        p_notes:          b.notes,
+        p_tags:           b.tags,
+      });
+      if (bizErr) {
+        console.error(`Failed to seed business "${b.name}":`, bizErr.message);
+        process.exit(1);
+      }
+    }
+    console.log(`✓ crm_business: ${seedBusinesses.length} seed businesses (supplier + sponsor + agency + media)`);
+  } else {
+    console.log(`✓ crm_business: skipped (tenant already has ${existingBiz.length}+ business(es))`);
+  }
+
   console.log("\nDone. Sign out and back in to pick up the new tenant.");
 }
 
