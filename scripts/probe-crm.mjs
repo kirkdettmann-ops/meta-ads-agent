@@ -21,7 +21,7 @@ if (!existsSync(envPath)) {
 }
 const env = readFileSync(envPath, 'utf8');
 const get = (k) => {
-  const m = env.match(new RegExp(`^${k}=(.*)$`, 'm));
+  const m = env.match(new RegExp(`^${k}=(.*)$`, 'm'));
   return m ? m[1].trim() : null;
 };
 
