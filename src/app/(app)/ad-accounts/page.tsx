@@ -36,7 +36,7 @@ export default async function BusinessesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Businesses</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Ad accounts</h1>
         <p className="text-sm text-muted-foreground">
           Meta Business Manager accounts for this tenant. {rows.length} total.
         </p>
@@ -65,7 +65,7 @@ export default async function BusinessesPage() {
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {rows.map((b) => (
-            <Link key={b.id} href={`/businesses/${b.id}`}>
+            <Link key={b.id} href={`/ad-accounts/${b.id}`}>
               <Card className="transition-shadow hover:shadow-md cursor-pointer h-full">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">

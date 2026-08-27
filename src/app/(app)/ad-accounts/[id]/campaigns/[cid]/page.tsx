@@ -95,11 +95,11 @@ export default async function CampaignDetailPage({ params }: Params) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/businesses" className="hover:underline">Businesses</Link>
+        <Link href="/ad-accounts" className="hover:underline">Ad accounts</Link>
         <ChevronRight className="h-4 w-4" />
-        <Link href={`/businesses/${id}`} className="hover:underline">{(business as { name: string }).name}</Link>
+        <Link href={`/ad-accounts/${id}`} className="hover:underline">{(business as { name: string }).name}</Link>
         <ChevronRight className="h-4 w-4" />
-        <Link href={`/businesses/${id}/campaigns`} className="hover:underline">Campaigns</Link>
+        <Link href={`/ad-accounts/${id}/campaigns`} className="hover:underline">Campaigns</Link>
         <ChevronRight className="h-4 w-4" />
         <span>{campaign?.name ?? cid}</span>
       </div>

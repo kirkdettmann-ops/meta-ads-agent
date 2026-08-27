@@ -67,9 +67,9 @@ export default async function CampaignsPage({ params }: Params) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/businesses" className="hover:underline">Businesses</Link>
+        <Link href="/ad-accounts" className="hover:underline">Ad accounts</Link>
         <ChevronRight className="h-4 w-4" />
-        <Link href={`/businesses/${id}`} className="hover:underline">{(business as { name: string }).name}</Link>
+        <Link href={`/ad-accounts/${id}`} className="hover:underline">{(business as { name: string }).name}</Link>
         <ChevronRight className="h-4 w-4" />
         <span>Campaigns</span>
       </div>
@@ -118,7 +118,7 @@ export default async function CampaignsPage({ params }: Params) {
                   {rows.map((c) => (
                     <tr key={c.meta_campaign_id} className="border-b border-border last:border-0 hover:bg-accent/50">
                       <td className="px-4 py-3">
-                        <Link href={`/businesses/${id}/campaigns/${c.meta_campaign_id}`} className="font-medium hover:underline">
+                        <Link href={`/ad-accounts/${id}/campaigns/${c.meta_campaign_id}`} className="font-medium hover:underline">
                           {c.name}
                         </Link>
                         <p className="text-xs text-muted-foreground">{c.objective ?? "—"}</p>
@@ -147,7 +147,7 @@ export default async function CampaignsPage({ params }: Params) {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <Link href={`/businesses/${id}/campaigns/${c.meta_campaign_id}`} className="text-muted-foreground hover:text-foreground">
+                        <Link href={`/ad-accounts/${id}/campaigns/${c.meta_campaign_id}`} className="text-muted-foreground hover:text-foreground">
                           <ChevronRight className="h-4 w-4" />
                         </Link>
                       </td>

@@ -11,10 +11,10 @@ import { createClient } from "@/lib/supabase/server";
  *
  * Why we read the user here instead of just `redirect("/dashboard")`:
  *   The middleware already redirects unauthenticated users from
- *   /dashboard (and /businesses/*, /recommendations) to /login, and it
+ *   /dashboard (and /ad-accounts/*, /recommendations) to /login, and it
  *   tacks `?next=<original-path>` onto the URL. That's the correct
  *   behavior for deep links — if a logged-out user opens
- *   /businesses/123, they should land on /login?next=/businesses/123 so
+ *   /ad-accounts/123, they should land on /login?next=/ad-accounts/123 so
  *   the magic-link flow can drop them back where they started.
  *
  *   But on the root, that "deep-link" reasoning doesn't apply: there's no

@@ -87,7 +87,7 @@ export async function getMetaClient(): Promise<{
 
 /**
  * Fetch a list of businesses accessible to the configured System User.
- * Used by the seed-tenant script and the /businesses page refresh.
+ * Used by the seed-tenant script and the /ad-accounts page refresh.
  */
 export async function fetchBusinesses(): Promise<
   Array<{ id: string; name: string; created_time: string }>

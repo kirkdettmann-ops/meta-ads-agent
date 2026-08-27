@@ -94,7 +94,7 @@ export default async function RecommendationsPage() {
                     <p className="text-xs text-muted-foreground">Campaign</p>
                     {r.meta_campaign_id ? (
                       <Link
-                        href={`/businesses/${"all"}/campaigns/${r.meta_campaign_id}`}
+                        href={`/ad-accounts/${"all"}/campaigns/${r.meta_campaign_id}`}
                         className="font-mono text-xs hover:underline"
                       >
                         {r.meta_campaign_id}

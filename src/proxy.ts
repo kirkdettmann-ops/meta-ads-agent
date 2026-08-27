@@ -7,7 +7,7 @@ import { updateSession } from "@/lib/supabase/middleware";
  * https://nextjs.org/docs/messages/middleware-to-proxy
  *
  * Refreshes the auth cookies on every request.
- * Protects /dashboard, /businesses, /recommendations from anonymous access.
+ * Protects /dashboard, /ad-accounts, /recommendations from anonymous access.
  */
 export async function proxy(request: NextRequest) {
   return await updateSession(request);

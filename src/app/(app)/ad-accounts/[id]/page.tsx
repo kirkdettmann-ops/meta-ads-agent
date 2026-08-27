@@ -42,7 +42,7 @@ export default async function BusinessDetailPage({ params }: Params) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link href="/businesses" className="hover:underline">Businesses</Link>
+        <Link href="/ad-accounts" className="hover:underline">Ad accounts</Link>
         <ChevronRight className="h-4 w-4" />
         <span>{biz.name}</span>
       </div>
@@ -125,7 +125,7 @@ export default async function BusinessDetailPage({ params }: Params) {
                 return (
                   <Link
                     key={a.id}
-                    href={`/businesses/${id}/campaigns`}
+                    href={`/ad-accounts/${id}/campaigns`}
                     className="flex items-center justify-between rounded-md border border-border p-3 hover:bg-accent transition-colors"
                   >
                     <div>
@@ -142,7 +142,7 @@ export default async function BusinessDetailPage({ params }: Params) {
           )}
           <div className="mt-4">
             <Link
-              href={`/businesses/${id}/campaigns`}
+              href={`/ad-accounts/${id}/campaigns`}
               className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-1.5 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               View campaigns →

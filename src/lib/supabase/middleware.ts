@@ -48,7 +48,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Protected paths: redirect to /login if no user.
-  const protectedPaths = ["/dashboard", "/businesses", "/recommendations"];
+  const protectedPaths = ["/dashboard", "/ad-accounts", "/recommendations"];
   const isProtected = protectedPaths.some((p) => request.nextUrl.pathname.startsWith(p));
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
