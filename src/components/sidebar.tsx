@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Building2, ListChecks, LogOut } from "lucide-react";
+import { LayoutDashboard, Building2, ListChecks, Users, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { ComedyClubLogo } from "./brand/comedy-club-logo";
 import type { Brand } from "@/lib/brand";
@@ -11,6 +11,7 @@ import type { Brand } from "@/lib/brand";
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/businesses", label: "Businesses", icon: Building2 },
+  { href: "/dashboard/crm/contacts", label: "CRM", icon: Users },
   { href: "/recommendations", label: "Recommendations", icon: ListChecks },
 ] as const;
 

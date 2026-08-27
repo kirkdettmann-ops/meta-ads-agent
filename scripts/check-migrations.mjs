@@ -71,6 +71,10 @@ const tables = [
   ['0013', 'tenant_social_handle'],
   // 0014
   ['0014', 'tenant_video_asset'],
+  // 0015
+  ['0015', 'tenant_brand'],
+  // 0017
+  ['0017', 'crm_contact'],
 ];
 
 const rpcs = [
@@ -86,6 +90,16 @@ const rpcs = [
   ['0013', 'get_connected_channels', [tenantArg]],
   // 0014
   ['0014', 'get_video_asset_readiness', [tenantArg]],
+  // 0015
+  ['0015', 'get_tenant_brand', [tenantArg]],
+  // 0017
+  ['0017', 'get_crm_contacts', [tenantArg]],
+  ['0017', 'upsert_crm_contact', [tenantArg, {
+    ...tenantArg, p_id: null, p_name: '__probe__',
+  }]],
+  ['0017', 'delete_crm_contact', [tenantArg, {
+    ...tenantArg, p_id: '00000000-0000-0000-0000-000000000000',
+  }]],
   // 0010 daily_briefing
   ['0010', 'get_daily_briefing', [tenantArg]],
 ];

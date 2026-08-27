@@ -166,6 +166,87 @@ async function main() {
   }
   console.log(`✓ tenant_social_handle: ${V1_PLATFORMS.join(", ")} (status=placeholder)`);
 
+  // 5. Seed a small batch of CRM contacts (migration 0017) for the demo.
+  // Only runs if the tenant has zero contacts — idempotent. If the admin
+  // wants a different starter set, they can delete these from the UI
+  // (or via the SQL Editor) and re-run the seed. KIRK, 2026-08-27.
+  const { data: existing, error: existingErr } = await supabase
+    .from("crm_contact")
+    .select("id")
+    .eq("tenant_id", tenant.id)
+    .limit(1);
+  if (existingErr) {
+    console.error("Failed to check existing crm_contacts:", existingErr.message);
+    process.exit(1);
+  }
+  if (!existing || existing.length === 0) {
+    const seedContacts = [
+      {
+        name: "Sarah Lim",
+        email: "sarah.lim@example.com",
+        phone: "+60 12 345 6789",
+        company: "Boom Boom Room",
+        role: "Headliner",
+        tags: ["comedian", "vip", "headliner"],
+        notes: "Available Feb–Mar 2027. Booked through agent.",
+      },
+      {
+        name: "Marcus Tan",
+        email: "marcus@freshbox.my",
+        phone: "+60 3 2026 1234",
+        company: "FreshBox Catering",
+        role: "Owner",
+        tags: ["food-vendor", "supplier", "weekly"],
+        notes: "Supplies the kitchen every Tue + Fri. Net-15 terms.",
+      },
+      {
+        name: "Lisa Wong",
+        email: "lisa@klfoodbeat.com",
+        company: "KL Food Beat",
+        role: "Senior Reporter",
+        tags: ["press", "media", "food"],
+        notes: "Wants first look at any new menu launches.",
+      },
+      {
+        name: "David Chen",
+        email: "david.chen@tigerbeer.example",
+        phone: "+60 3 2726 8888",
+        company: "Tiger Beer",
+        role: "Marketing Director",
+        tags: ["sponsor", "brand", "recurring"],
+        notes: "Quarterly co-promotion budget. Q2 renews 2027-04-01.",
+      },
+      {
+        name: "Jenna Park",
+        email: "jenna.park@example.com",
+        company: undefined,
+        role: undefined,
+        tags: ["vip", "regular"],
+        notes: "Friday-night regular since 2019. Prefers booth 4.",
+      },
+    ];
+    for (const c of seedContacts) {
+      const { error: crmErr } = await supabase.rpc("upsert_crm_contact", {
+        p_tenant_id: tenant.id,
+        p_id:        null,
+        p_name:      c.name,
+        p_email:     c.email,
+        p_phone:     c.phone,
+        p_company:   c.company,
+        p_role:      c.role,
+        p_tags:      c.tags,
+        p_notes:     c.notes,
+      });
+      if (crmErr) {
+        console.error(`Failed to seed contact "${c.name}":`, crmErr.message);
+        process.exit(1);
+      }
+    }
+    console.log(`✓ crm_contact: ${seedContacts.length} seed contacts (comedian + food + press + sponsor + VIP)`);
+  } else {
+    console.log(`✓ crm_contact: skipped (tenant already has ${existing.length}+ contact(s))`);
+  }
+
   console.log("\nDone. Sign out and back in to pick up the new tenant.");
 }
 
