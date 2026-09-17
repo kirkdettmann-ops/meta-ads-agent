@@ -20,6 +20,7 @@
  */
 
 import { useTransition } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { setActiveBrand } from "@/app/(app)/actions/set-active-brand";
 import type { Brand } from "@/lib/brand";
@@ -76,20 +77,23 @@ export function BrandSwitcher({ brands, activeSlug }: Props) {
                 : "text-muted-foreground hover:bg-background hover:text-foreground",
             )}
           >
+            {/*
+              Logo dot. Uses next/image for proper rendering. The logo is
+              shown as-is (no color inversion on active) so it stays
+              readable — the active state is indicated by the tab's
+              red background + white text, not by changing the logo.
+              KIRK 2026-09-17: removed the brightness(0) invert(1) filter
+              that was making the active logo a white-on-red invisible box.
+            */}
             {b.logoUrl ? (
-              <span
+              <Image
+                src={b.logoUrl}
+                alt=""
+                width={14}
+                height={14}
                 aria-hidden="true"
-                className="inline-block h-3.5 w-3.5 rounded-sm bg-current"
-                style={{
-                  // Tiny logo dot — uses CSS mask so the logo color-matches
-                  // the tab foreground. Works with both dark and active states.
-                  backgroundImage: `url(${b.logoUrl})`,
-                  backgroundSize: "contain",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center",
-                  // On active tab the bg is brand primary; mask it white.
-                  filter: isActive ? "brightness(0) invert(1)" : "none",
-                }}
+                className="h-3.5 w-3.5 shrink-0 object-contain"
+                unoptimized
               />
             ) : null}
             {b.displayName}
