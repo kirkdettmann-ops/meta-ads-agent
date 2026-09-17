@@ -67,19 +67,23 @@ export async function DashboardHero({
   //
   // KIRK 2026-09-17 (D27): Kirk wanted the watermark more prominent — it
   // was corner-cut and faint (h-64 at opacity 0.06, anchored -right-10
-  // -top-12 which chopped the right edge off). Now it's ~480px, vertically
-  // centered on the right side, opacity 0.10 (light) / 0.08 (dark). The
-  // negative right still pushes it slightly past the rounded border so the
-  // watermark doesn't visually fight the card edge.
+  // -top-12 which chopped the right edge off). Now it's ~420px,
+  // vertically centered on the right side, opacity 0.10 (light) / 0.12
+  // (dark). Render the logo in its natural colors in both modes —
+  // inverting (dark:invert) on the watermark turns the cream Hops
+  // interior into a dark blob that reads as "negative" (Kirk's exact
+  // reaction). The header <BrandLogo> used to invert too; that's now
+  // also reverted — Kirk prefers the natural logo colors even on the
+  // dark header. Some elements fade against dark bg, but that's a
+  // better outcome than a chemically-altered negative.
   //
-  // KIRK 2026-09-17 (D27 followup): do NOT apply dark:invert here. The
-  // header <BrandLogo> uses dark:invert so the Hops black marquee +
-  // Perks brown wordmark stay readable on the dark header. But the
-  // watermark is a faded background silhouette — inverting the logo
-  // turns the cream Hops interior into a dark blue void that reads as
-  // "negative / colors removed" at 8% opacity (Kirk's exact reaction
-  // after the first push). The natural cream interior actually
-  // provides nicer silhouette texture on a dark card without invert.
+  // KIRK 2026-09-17 (D27 followup #2): the first position used
+  // translate-x-1/3 which pushed the logo ~140px past the right edge
+  // of the card, clipping the right half (Kirk: "The Perks logo is
+  // cut off"). Now flush right (right-0, no translate-x) so the full
+  // logo fits inside the card. The rounded-xl corners will clip a few
+  // pixels at the very top-right + bottom-right of the logo, but the
+  // body of the marquee / wordmark stays visible.
   const watermark = brand.logoUrl ? (
     <Image
       src={brand.logoUrl}
@@ -87,7 +91,7 @@ export async function DashboardHero({
       aria-hidden="true"
       width={480}
       height={480}
-      className="pointer-events-none absolute right-0 top-1/2 hidden h-[420px] w-[420px] -translate-y-1/2 translate-x-1/3 object-contain opacity-[0.10] dark:opacity-[0.12] md:block"
+      className="pointer-events-none absolute right-0 top-1/2 hidden h-[420px] w-[420px] -translate-y-1/2 object-contain opacity-[0.10] dark:opacity-[0.12] md:block"
     />
   ) : brand.watermarkSvg ? (
     <div
