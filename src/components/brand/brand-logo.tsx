@@ -69,7 +69,19 @@ export function BrandLogo({
           width={s.imagePx}
           height={s.imagePx}
           priority={s.priority}
-          className={cn(s.box, "shrink-0 object-contain")}
+          // KIRK 2026-09-17 (D27 followup #3): only invert the Perks
+          // wordmark in dark mode. Hops logo (cream interior + black
+          // marquee) reads fine in its natural colors on a dark card;
+          // Perks (dark brown wordmark) fades into the dark bg without
+          // an invert. `brand.slug === "perks"` is the cleanest gate —
+          // any future brand slug we add gets natural rendering by
+          // default, no special-case list to maintain.
+          className={cn(
+            s.box,
+            "shrink-0 object-contain",
+            brand.slug === "perks" &&
+              "dark:invert dark:hue-rotate-180",
+          )}
         />
       ) : (
         <span className={cn("flex min-w-0 flex-col leading-none")}>

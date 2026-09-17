@@ -84,6 +84,11 @@ export async function DashboardHero({
   // logo fits inside the card. The rounded-xl corners will clip a few
   // pixels at the very top-right + bottom-right of the logo, but the
   // body of the marquee / wordmark stays visible.
+  //
+  // KIRK 2026-09-17 (D27 followup #3): invert ONLY the Perks watermark
+  // in dark mode (same gate as <BrandLogo>). Hops' cream interior
+  // reads fine in natural colors; Perks' dark brown wordmark needs
+  // the lift to remain visible at low opacity on a dark card.
   const watermark = brand.logoUrl ? (
     <Image
       src={brand.logoUrl}
@@ -91,7 +96,10 @@ export async function DashboardHero({
       aria-hidden="true"
       width={480}
       height={480}
-      className="pointer-events-none absolute right-0 top-1/2 hidden h-[420px] w-[420px] -translate-y-1/2 object-contain opacity-[0.10] dark:opacity-[0.12] md:block"
+      className={cn(
+        "pointer-events-none absolute right-0 top-1/2 hidden h-[420px] w-[420px] -translate-y-1/2 object-contain opacity-[0.10] dark:opacity-[0.12] md:block",
+        brand.slug === "perks" && "dark:invert dark:hue-rotate-180",
+      )}
     />
   ) : brand.watermarkSvg ? (
     <div
