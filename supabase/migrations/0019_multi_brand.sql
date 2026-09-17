@@ -6,7 +6,9 @@
 --          brand-cookie.
 --
 -- Schema changes (in this order):
---   * Add `id uuid` column (becomes the new PK)
+--   * Add `id uuid DEFAULT gen_random_uuid()` column (becomes the new PK;
+--     the DEFAULT is critical — without it, the demo data fix-up INSERT
+--     and the upsert_tenant_brand function fail with NOT NULL id violations)
 --   * Drop the old PK on `tenant_id`
 --   * Add the new PK on `id`
 --   * Add `slug`, `kind`, `is_active`, `sort_order`, `logo_url`
@@ -14,6 +16,17 @@
 --   * UNIQUE (tenant_id, slug) + CHECK (kind)
 --   * watermark_svg becomes nullable (optional; logo_url replaces it as the
 --     primary brand-mark source)
+--
+-- IMPORTANT: this migration contains PL/pgSQL constructs (`do $$` block +
+-- a PL/pgSQL function body that uses its own `$$` delimiters). These work
+-- fine when applied via direct Postgres (Supavisor pooler on port 6543, or
+-- the direct connection on port 5432). They DO NOT work via the Supabase
+-- SQL Editor, because the editor has a statement-splitter that mis-parses
+-- `$$` boundaries and rejects the result with errors like "relation
+-- 'v_caller_tenant_id' does not exist".
+--
+-- Apply via: node scripts/run-multi-brand-migration.mjs (uses the pooler).
+-- Do NOT apply via the SQL Editor paste.
 --
 -- Data changes (one-time demo fix-up):
 --   * The existing Comedy Club Co brand row gets renamed to "Hops" (slug=hops,
@@ -29,7 +42,9 @@
 --   * New `get_tenant_brands(p_tenant_id)` returns ALL active brands
 --     ordered by sort_order — used by the brand switcher in the header.
 --   * `upsert_tenant_brand(...)` gains a `p_slug` parameter and a `p_kind`
---     + `p_is_active` + `p_sort_order` + `p_logo_url` set.
+--     + `p_is_active` + `p_sort_order` + `p_logo_url` set. Slug validation
+--     enforced: must match ^[a-z0-9]([a-z0-9-]{0,38}[a-z0-9])?$ (lowercase
+--     letters, digits, dashes; 1-40 chars; no leading/trailing dash).
 --   * watermark_svg return type goes from NOT NULL to nullable.
 --
 -- Multi-tenant: still 100% scoped by tenant_id. RLS policies don't change
@@ -42,19 +57,18 @@
 -- ============================================================================
 -- 1. Schema: add id column, drop old PK, make id the PK
 -- ============================================================================
+-- The id column MUST have DEFAULT gen_random_uuid() — otherwise the demo
+-- data fix-up's INSERT into tenant_brand (and the upsert_tenant_brand
+-- function) will fail with "null value in column id violates not-null".
+-- Caught the hard way on the live demo in 2026-09-17.
 
 alter table public.tenant_brand
-  add column if not exists id uuid;
+  add column if not exists id uuid default gen_random_uuid();
 
-update public.tenant_brand
-set id = gen_random_uuid()
-where id is null;
-
+-- Existing rows now have a non-null id (from the default). Drop the old
+-- PK on tenant_id and make id the new PK.
 alter table public.tenant_brand
-  alter column id set not null;
-
-alter table public.tenant_brand
-  drop constraint tenant_brand_pkey;
+  drop constraint if exists tenant_brand_pkey;
 
 alter table public.tenant_brand
   add primary key (id);

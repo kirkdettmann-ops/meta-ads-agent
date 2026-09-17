@@ -75,8 +75,8 @@ if (tenants.length === 0) {
 const tenantId = tenants[0].id;
 console.log(`✓ Found tenant: ${tenants[0].name} (${tenantId})`);
 
-const PROBE_A_SLUG = '__probe_alpha__';
-const PROBE_B_SLUG = '__probe_bravo__';
+const PROBE_A_SLUG = 'probe-alpha';
+const PROBE_B_SLUG = 'probe-bravo';
 
 async function deleteProbe(slug) {
   // No dedicated delete RPC exists; use direct table access via the

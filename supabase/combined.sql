@@ -2659,7 +2659,7 @@ comment on function public.delete_crm_business(uuid, uuid) is
 -- ============================================================================
 
 alter table public.tenant_brand
-  add column if not exists id uuid;
+  add column if not exists id uuid default gen_random_uuid();
 
 update public.tenant_brand
 set id = gen_random_uuid()
