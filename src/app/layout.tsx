@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 // Product name is env-driven so a customer taking over the deployment can
 // rebrand the browser tab without a code change. Falls back to the demo
@@ -19,9 +20,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning: next-themes toggles `<html class="dark">`
+    // client-side based on localStorage; without this warning, React
+    // complains about the server-rendered (no class) vs client-rendered
+    // (with class) mismatch. The next-themes docs require this on <html>.
+    <html lang="en" suppressHydrationWarning>
       <body className="min-h-screen bg-background font-sans antialiased">
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

@@ -1,5 +1,22 @@
 @import "tailwindcss";
 
+/*
+ * Dark mode configuration
+ * ----------------------------------------------------------------
+ * Tailwind v4: enable `dark:` variant via the @custom-variant directive.
+ * The class is added to <html> by the next-themes provider when the
+ * user toggles theme (or picks "system" and the OS preference flips).
+ * Components like `bg-card`, `text-foreground`, `border-border` etc.
+ * use the CSS variables below, which the `.dark` block overrides —
+ * so a single dark class flips the entire palette.
+ *
+ * KIRK, 2026-09-17: dark mode shipped alongside the multi-brand UI.
+ * Color choices: keep the brand primary (Hops red, Perks brown) the
+ * same across themes — they are identity, not theme-dependent. Tweak
+ * only the structural colors (background, foreground, muted, border).
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.145 0 0);
@@ -25,6 +42,33 @@
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
   --radius: 0.5rem;
+}
+
+/*
+ * Dark theme overrides.
+ *
+ * Only structural colors flip. Brand colors (primary, destructive,
+ * success, warning, info) stay the same — they're identity tokens,
+ * not theme-dependent. The accent accent-foreground and secondary
+ * colors flip because they're surface-level hover/contrast helpers.
+ *
+ * Background: deep cool gray (slight blue tint) so Hops' warm red
+ * pops without competing. Foreground: near-white (not pure white)
+ * to reduce eye strain.
+ */
+.dark {
+  --color-background: oklch(0.145 0.02 240);
+  --color-foreground: oklch(0.96 0 0);
+  --color-muted: oklch(0.22 0.02 240);
+  --color-muted-foreground: oklch(0.65 0 0);
+  --color-card: oklch(0.2 0.02 240);
+  --color-card-foreground: oklch(0.96 0 0);
+  --color-border: oklch(0.28 0.02 240);
+  --color-input: oklch(0.28 0.02 240);
+  --color-secondary: oklch(0.24 0.02 240);
+  --color-secondary-foreground: oklch(0.96 0 0);
+  --color-accent: oklch(0.24 0.02 240);
+  --color-accent-foreground: oklch(0.96 0 0);
 }
 
 * {

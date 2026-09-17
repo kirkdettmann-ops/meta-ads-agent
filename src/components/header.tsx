@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { MobileNav } from "./brand/mobile-nav";
 import { BrandLogo } from "./brand/brand-logo";
 import { BrandSwitcher } from "./brand-switcher";
+import { ThemeToggle } from "./theme-toggle";
 import type { Brand } from "@/lib/brand";
 
 type Props = {
@@ -46,6 +47,9 @@ export function Header({ email, displayName, role, brand, brands }: Props) {
         {brands.length > 1 && (
           <BrandSwitcher brands={brands} activeSlug={brand.slug} />
         )}
+
+        {/* Theme toggle (sun/moon) — switches between light + dark + system */}
+        <ThemeToggle />
 
         <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
           <User className="h-4 w-4" />
