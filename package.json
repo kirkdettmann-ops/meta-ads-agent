@@ -36,6 +36,7 @@
     "@types/react-dom": "^19.0.0",
     "pg": "^8.23.0",
     "postcss": "^8.4.49",
+    "sharp": "^0.35.4",
     "supabase": "^1.215.0",
     "tailwindcss": "^4.0.0",
     "tsx": "^4.19.2",

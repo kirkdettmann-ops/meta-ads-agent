@@ -64,14 +64,23 @@ export async function DashboardHero({
   // faded PNG. Legacy fallback: brand.watermarkSvg as inline SVG via
   // dangerouslySetInnerHTML (the SVG string is written by the admin, never
   // by an end user — XSS surface is null).
+  //
+  // KIRK 2026-09-17 (D27): Kirk wanted the watermark more prominent — it
+  // was corner-cut and faint (h-64 at opacity 0.06, anchored -right-10
+  // -top-12 which chopped the right edge off). Now it's ~480px, vertically
+  // centered on the right side, opacity 0.10 (light) / 0.08 (dark). The
+  // negative right still pushes it slightly past the rounded border so the
+  // watermark doesn't visually fight the card edge. dark:invert flips
+  // black-on-dark content (Hops marquee, Perks brown wordmark) to a
+  // light tint so it stays visible against the dark card.
   const watermark = brand.logoUrl ? (
     <Image
       src={brand.logoUrl}
       alt=""
       aria-hidden="true"
-      width={260}
-      height={260}
-      className="pointer-events-none absolute -right-10 -top-12 hidden h-64 w-64 object-contain opacity-[0.06] md:block"
+      width={480}
+      height={480}
+      className="pointer-events-none absolute right-0 top-1/2 hidden h-[420px] w-[420px] -translate-y-1/2 translate-x-1/3 object-contain opacity-[0.10] dark:invert dark:opacity-[0.08] md:block"
     />
   ) : brand.watermarkSvg ? (
     <div
