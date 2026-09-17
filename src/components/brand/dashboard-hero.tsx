@@ -1,8 +1,9 @@
 import { Badge } from "@/components/ui/badge";
-import { ComedyClubLogo } from "./comedy-club-logo";
+import { BrandLogo } from "./brand-logo";
 import { cn } from "@/lib/utils";
-import { getTenantBrand } from "@/lib/brand-server";
+import { getActiveTenantBrand } from "@/lib/brand-server";
 import { requireUserWithProfile } from "@/lib/auth";
+import Image from "next/image";
 
 type BadgeVariant = "default" | "secondary" | "outline";
 
@@ -22,21 +23,21 @@ type Props = {
 /**
  * Branded hero for the customer's dashboard.
  *
- * Replaces the old plain h1 + subtitle. Anchors the page as a
- * customer-facing view via the tenant's brand wordmark + corner watermark
- * (the SVG comes from `tenant_brand.watermark_svg`), shows the current
- * ad-format / platform scope, and the daily briefing date.
+ * Uses the ACTIVE brand (from the cookie via `getActiveTenantBrand`) so
+ * the hero re-skins when the operator switches between Hops and Perks.
  *
- * Decorative watermark (large faded brand mark) in the top-right gives the
- * card a Kin & Canopy-style editorial feel without being literal.
+ * Decorations:
+ *   - Top accent strip in `brand.primaryOklch` (the brand red/brown)
+ *   - Faded brand logo in the top-right corner — `brand.logoUrl` if set
+ *     (new pattern, Hops + Perks), else `brand.watermarkSvg` SVG (legacy)
+ *
+ * Tagline renders below the wordmark when brand.tagline is non-null
+ * (currently neither Hops nor Perks ships with a tagline — Kirk chose
+ * logo-only in 2026-09-17 — so the tagline slot is empty).
  *
  * Use this on every /dashboard/* route. Agency-owner pages (Businesses,
  * Recommendations) keep their plain h1 headers — those aren't customer-
  * facing showcases.
- *
- * Brand is fetched server-side per request. The RPC has hardcoded fallbacks
- * so a fresh tenant without a brand row still gets the Comedy Club Co
- * defaults — no broken UI.
  */
 export async function DashboardHero({
   title,
@@ -47,7 +48,7 @@ export async function DashboardHero({
   className,
 }: Props) {
   const { profile } = await requireUserWithProfile();
-  const brand = await getTenantBrand(profile.tenant_id);
+  const brand = await getActiveTenantBrand(profile.tenant_id);
 
   const dateStr =
     typeof date === "string"
@@ -59,6 +60,27 @@ export async function DashboardHero({
           year: "numeric",
         });
 
+  // Build the corner watermark. New pattern: brand.logoUrl rendered as a
+  // faded PNG. Legacy fallback: brand.watermarkSvg as inline SVG via
+  // dangerouslySetInnerHTML (the SVG string is written by the admin, never
+  // by an end user — XSS surface is null).
+  const watermark = brand.logoUrl ? (
+    <Image
+      src={brand.logoUrl}
+      alt=""
+      aria-hidden="true"
+      width={260}
+      height={260}
+      className="pointer-events-none absolute -right-10 -top-12 hidden h-64 w-64 object-contain opacity-[0.06] md:block"
+    />
+  ) : brand.watermarkSvg ? (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute -right-8 -top-10 hidden h-56 w-56 text-foreground opacity-[0.04] md:block"
+      dangerouslySetInnerHTML={{ __html: brand.watermarkSvg }}
+    />
+  ) : null;
+
   return (
     <div
       className={cn(
@@ -66,25 +88,26 @@ export async function DashboardHero({
         className,
       )}
     >
-      {/* Top accent strip — uses the primary red so each hero lands the same way */}
-      <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
-
-      {/* Faded watermark (brand.watermark_svg) in the top-right corner.
-          Rendered via dangerouslySetInnerHTML because the SVG is per-tenant
-          (the customer's brand mark) and we can't predict the shape. The
-          string comes from public.tenant_brand.watermark_svg, which is
-          written by the tenant owner or an admin via the upsert RPC —
-          never by an end user. */}
+      {/* Top accent strip — uses the brand primary color */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-8 -top-10 hidden h-56 w-56 text-foreground opacity-[0.04] md:block"
-        dangerouslySetInnerHTML={{ __html: brand.watermarkSvg }}
+        className="absolute inset-x-0 top-0 h-1"
+        style={{ backgroundColor: `var(--color-primary, oklch(0.55 0.22 27))` }}
       />
 
+      {/* Faded brand watermark in the top-right corner */}
+      {watermark}
+
       <div className="relative flex flex-col gap-6 p-6 md:flex-row md:items-start md:justify-between md:gap-10 md:p-8">
-        {/* Left: brand + title + date */}
+        {/* Left: brand logo + title + date */}
         <div className="flex min-w-0 flex-col gap-5">
-          <ComedyClubLogo brand={brand} size="xl" />
+          <BrandLogo brand={brand} size="xl" />
+
+          {brand.tagline && (
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+              {brand.tagline}
+            </p>
+          )}
 
           <div className="space-y-1.5">
             <div className="flex flex-wrap items-baseline gap-2">

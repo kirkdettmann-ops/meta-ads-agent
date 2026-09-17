@@ -6,11 +6,11 @@ import { useState, useTransition } from "react";
 // is no longer exported (per a fresh tsc check after flipping
 // typescript.ignoreBuildErrors to false).
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ComedyClubLogo } from "@/components/brand/comedy-club-logo";
-import { ComedyClubMark } from "@/components/brand/comedy-club-mark";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { FALLBACK_BRAND, type Brand } from "@/lib/brand";
 import { demoLogin } from "./actions";
 
@@ -30,6 +30,10 @@ const demoLoginEnabled = process.env.NEXT_PUBLIC_DEMO_LOGIN === "true";
  * without needing a "site config" singleton row. The customer's cutover
  * checklist: set NEXT_PUBLIC_PRODUCT_NAME in Vercel, and the tab title +
  * login wordmark both re-brand.
+ *
+ * KIRK, 2026-09-17: multi-brand refactor. loginBrand now also reads
+ * NEXT_PUBLIC_BRAND_LOGO_URL so the login page can show the brand PNG.
+ * Defaults to FALLBACK_BRAND.logoUrl (which is /logos/hops-logo.png).
  */
 const loginBrand: Brand = {
   ...FALLBACK_BRAND,
@@ -38,6 +42,7 @@ const loginBrand: Brand = {
   wordmarkBold: process.env.NEXT_PUBLIC_BRAND_WORDMARK_BOLD ?? FALLBACK_BRAND.wordmarkBold,
   wordmarkLight: process.env.NEXT_PUBLIC_BRAND_WORDMARK_LIGHT ?? FALLBACK_BRAND.wordmarkLight,
   tagline: process.env.NEXT_PUBLIC_BRAND_TAGLINE ?? FALLBACK_BRAND.tagline,
+  logoUrl: process.env.NEXT_PUBLIC_BRAND_LOGO_URL ?? FALLBACK_BRAND.logoUrl,
 };
 
 interface LoginFormProps {
@@ -274,13 +279,20 @@ function LoginShell({ children }: { children: React.ReactNode }) {
             strokeLinecap="round"
           />
         </svg>
-        {/* Page-level mic watermark — bigger and more visible on the dark base.
-            Color is the brand red so it reads as intentional decor, not noise. */}
+        {/* Page-level brand watermark — bigger and more visible on the dark base.
+            Renders the login brand's PNG logo (default Hops). On the dark
+            base this reads as intentional decor, not noise. */}
         <div className="absolute -bottom-44 -left-36 hidden h-[560px] w-[560px] opacity-[0.06] md:block">
-          <ComedyClubMark
-            className="h-full w-full text-primary"
-            aria-label={loginBrand.displayName}
-          />
+          {loginBrand.logoUrl ? (
+            <Image
+              src={loginBrand.logoUrl}
+              alt=""
+              aria-hidden="true"
+              width={560}
+              height={560}
+              className="h-full w-full object-contain text-primary"
+            />
+          ) : null}
         </div>
       </div>
 
@@ -288,19 +300,25 @@ function LoginShell({ children }: { children: React.ReactNode }) {
         {/* Top accent strip — same as DashboardHero */}
         <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 
-        {/* Faded watermark mic in the top-right corner — same trick as the hero */}
+        {/* Faded brand watermark in the top-right corner — same trick as the hero */}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -right-10 -top-12 hidden h-64 w-64 opacity-[0.06] md:block"
         >
-          <ComedyClubMark
-            className="h-full w-full text-foreground"
-            aria-label={loginBrand.displayName}
-          />
+          {loginBrand.logoUrl ? (
+            <Image
+              src={loginBrand.logoUrl}
+              alt=""
+              aria-hidden="true"
+              width={256}
+              height={256}
+              className="h-full w-full object-contain text-foreground"
+            />
+          ) : null}
         </div>
 
         <div className="relative flex flex-col items-center gap-6 p-8 text-center md:p-10">
-          <ComedyClubLogo brand={loginBrand} size="xl" />
+          <BrandLogo brand={loginBrand} size="xl" />
 
           <div className="flex flex-col items-center gap-3">{children}</div>
         </div>

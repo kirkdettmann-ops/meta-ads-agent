@@ -5,18 +5,21 @@ import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { MobileNav } from "./brand/mobile-nav";
-import { ComedyClubMark } from "./brand/comedy-club-mark";
+import { BrandLogo } from "./brand/brand-logo";
+import { BrandSwitcher } from "./brand-switcher";
 import type { Brand } from "@/lib/brand";
 
 type Props = {
   email: string | null;
   displayName: string | null;
   role: string | null;
-  /** Tenant brand — used for the mobile mark's aria-label. */
+  /** The brand currently active for this request — drives the mobile mark. */
   brand: Brand;
+  /** All active brands for the tenant — powers the brand switcher tabs. */
+  brands: Brand[];
 };
 
-export function Header({ email, displayName, role, brand }: Props) {
+export function Header({ email, displayName, role, brand, brands }: Props) {
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -29,13 +32,21 @@ export function Header({ email, displayName, role, brand }: Props) {
     <header className="flex h-14 items-center justify-between gap-2 border-b border-border bg-background px-4 md:px-6">
       <div className="flex items-center gap-2">
         <MobileNav brand={brand} />
-        {/* Brand mark on mobile — sidebar holds the full wordmark on desktop */}
-        <ComedyClubMark
-          className="h-7 w-7 text-foreground md:hidden"
-          aria-label={brand.displayName}
-        />
+        {/* Brand logo on mobile — sidebar holds the full logo on desktop.
+            BrandLogo renders the PNG via next/image when brand.logoUrl is set
+            (Hops + Perks) or the text wordmark otherwise. */}
+        <span className="md:hidden">
+          <BrandLogo brand={brand} size="sm" />
+        </span>
       </div>
-      <div className="flex items-center gap-3">
+
+      <div className="flex flex-1 items-center justify-end gap-3">
+        {/* Brand switcher — sits centered-ish in the header. Renders nothing
+            when the tenant only has one active brand. */}
+        {brands.length > 1 && (
+          <BrandSwitcher brands={brands} activeSlug={brand.slug} />
+        )}
+
         <div className="hidden items-center gap-2 text-sm text-muted-foreground sm:flex">
           <User className="h-4 w-4" />
           <span>{displayName || email || "—"}</span>

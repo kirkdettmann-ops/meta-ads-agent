@@ -73,6 +73,8 @@ const tables = [
   ['0014', 'tenant_video_asset'],
   // 0015
   ['0015', 'tenant_brand'],
+  // 0019
+  ['0019', 'tenant_brand'], // same table as 0015, re-listed for visibility
   // 0017
   ['0017', 'crm_contact'],
   // 0018
@@ -109,6 +111,22 @@ const rpcs = [
   }]],
   ['0018', 'delete_crm_business', [tenantArg, {
     ...tenantArg, p_id: '00000000-0000-0000-0000-000000000000',
+  }]],
+  // 0019 (multi-brand: get_tenant_brands + extended get_tenant_brand + extended upsert)
+  ['0019', 'get_tenant_brands', [tenantArg]],
+  ['0019', 'get_tenant_brand', [tenantArg, { ...tenantArg, p_slug: null }]],
+  ['0019', 'upsert_tenant_brand', [tenantArg, {
+    ...tenantArg,
+    p_slug: '__probe__',
+    p_kind: 'secondary',
+    p_product_name: '__probe__',
+    p_display_name: '__probe__',
+    p_wordmark_bold: '__probe__',
+    p_wordmark_light: '',
+    p_tagline: null,
+    p_primary_oklch: 'oklch(0.5 0.1 200)',
+    p_logo_url: null,
+    p_watermark_svg: null,
   }]],
   // 0010 daily_briefing
   ['0010', 'get_daily_briefing', [tenantArg]],

@@ -6,7 +6,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, LayoutDashboard, Building2, Briefcase, Users, ListChecks, LogOut, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { ComedyClubLogo } from "./brand/comedy-club-logo";
+import { BrandLogo } from "./brand/brand-logo";
 import type { Brand } from "@/lib/brand";
 
 /**
@@ -95,7 +95,7 @@ export function SidebarContents({
   return (
     <>
       <div className="flex h-14 items-center border-b border-border px-4">
-        <ComedyClubLogo brand={brand} size="md" asLink />
+        <BrandLogo brand={brand} size="md" asLink />
       </div>
       <nav className="flex-1 space-y-1 px-2 py-4">
         {nav.map((item) =>
